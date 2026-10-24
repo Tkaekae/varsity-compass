@@ -189,7 +189,7 @@ def check_course(c, me):
 st.title("🧭 VarsityCompass")
 st.write("Enter your matric marks and see which programmes you qualify for, how far you are from the "
          "ones you don't, and whether applications are still open.")
-0
+
 # ----- Sidebar: the student's marks -----
 st.sidebar.header("Your marks (%)")
 english_mark = st.sidebar.number_input("English (Home Language or First Additional)", 0, 100, 65)
