@@ -182,6 +182,31 @@ def check_course(c, me):
         return "close", messages, levels_needed
     return "not_yet", messages, levels_needed
 
+def best_moves(me, courses):
+    """Try raising each subject by ONE level. Count the programmes that would newly open up."""
+    names = ["English", me["maths_type"], "Physical Sciences",
+             "Other subject 1", "Other subject 2", "Other subject 3", "Other subject 4"]
+    moves = []
+    for i, name in enumerate(names):
+        level = me["levels"][i]
+        if level == 0 or level >= 7:   # not taken, or already at the top
+            continue
+        better = dict(me)
+        better["levels"] = list(me["levels"])
+        better["levels"][i] = level + 1
+        if i == 0:
+            better["english"] = level + 1
+        elif i == 1:
+            better["maths_level"] = level + 1
+        elif i == 2:
+            better["phys_level"] = level + 1
+        unlocked = [c for c in courses
+                    if check_course(c, me)[0] != "qualify" and check_course(c, better)[0] == "qualify"]
+        if unlocked:
+            moves.append((len(unlocked), name, level, unlocked))
+    moves.sort(key=lambda m: m[0], reverse=True)
+    return moves
+
 
 # ----------------------------------------------------------------------
 # PAGE
@@ -259,6 +284,16 @@ def show(items, icon):
                 st.caption("Note: " + c["note"])
             st.caption("Source: " + c["source"])
 
+moves = best_moves(me, [c for c in COURSES if c["uni"] in chosen_unis])
+if moves:
+    count, name, level, unlocked = moves[0]
+    with st.container(border=True):
+        st.markdown("### 🚀 Your best move")
+        st.write(f"Raise **{name}** from level {level} to level {level + 1} and you unlock "
+                 f"**{count}** more programme(s):")
+        for c in unlocked:
+            tag = "" if deadline_text(c["closing"])[0] else " (2027 applications already closed)"
+            st.write(f"• {c['name']} ({c['uni']}){tag}")
 
 st.subheader(f"✅ You qualify ({len(results['qualify'])})")
 show(results["qualify"], "✅")
